@@ -44,7 +44,7 @@ function Me() {
             </ul>
           </nav>
         </div>
-        <div className="flex justify-between items-center border-b text-sm py-4 px-8 sticky">
+        <div className="flex justify-between items-center border-b text-sm py-4 px-8 ">
           <div className="flex-1">
             <h1 className='text-2xl font-thin italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600 uppercase'>
               STORE
@@ -69,7 +69,7 @@ function Me() {
           </div>
         </div>
         <div className="flex flex-col items-center text-sm text-gray-800 w-full mt-8">
-          {/* 我的账户 */}
+          
           <div className="w-4/5 bg-white shadow-md p-6 rounded mb-8">
             <h2 className="text-xl font-bold mb-4">我的账户</h2>
             <p className="mb-4">登录：+8615678584668</p>
@@ -103,27 +103,27 @@ function Me() {
             </div>
           </div>
 
-          {/* 我的订单 */}
+          
           <div className="w-4/5 bg-white shadow-md p-6 rounded mb-8 text-center">
             <h2 className="text-xl font-bold mb-4">我的订单</h2>
             <p className="mb-4">没有订单</p>
             <button className="bg-black text-white py-2 px-6 rounded">开始购物</button>
           </div>
 
-          {/* 我的保养服务 */}
+          
           <div className="w-4/5 bg-white shadow-md p-6 rounded mb-8 text-center">
             <h2 className="text-xl font-bold mb-4">我的保养服务</h2>
             <p className="mb-4">保养服务项目中当前没有产品</p>
             <button className="bg-black text-white py-2 px-6 rounded">联系服务中心</button>
           </div>
 
-          {/* 我的愿望录 */}
+          
           <div className="w-4/5 bg-white shadow-md p-6 rounded mb-8 text-center">
             <h2 className="text-xl font-bold mb-4">我的愿望录</h2>
             <p>您的愿望录中还没有添加任何产品</p>
           </div>
 
-          {/* 回到顶部 */}
+          
           <div className="mb-10">
             <button className="border px-4 py-2 rounded">回到顶部 ⮝</button>
           </div>
