@@ -29,7 +29,7 @@ function Me() {
               </li>
               <li className='m-3'>
                 <Link href="/me" className="flex items-center ">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1 hover:fill-pink-500" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1 fill-pink-500" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
                 </Link>
@@ -51,20 +51,41 @@ function Me() {
             </h1>
           </div>
           <div className="flex justify-end w-3/5 space-x-4">
-            <Link href="/me" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500">
-              我的账户
+            <Link href="/me" className="text-pink-500 border-b-2 border-black px-3 py-1 transition-all border-pink-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              </svg>
+              账户
             </Link>
-            <Link href="#" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500">
-              我的订单
+            <Link href="#" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+              </svg>
+              订单
             </Link>
-            <Link href="#" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500">
-              我的证书
+            <Link href="#" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clipRule="evenodd" />
+              </svg>
+              优惠
             </Link>
-            <Link href="#" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500">
-              我的愿望录
+            <Link href="#" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              收藏
             </Link>
-            <Link href="#" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500">
-              我的保养服务
+            <Link href="#" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+              </svg>
+              售后
+            </Link>
+            <Link href="#" className="hover:text-pink-500 border-b-2 border-black px-3 py-1 transition-all hover:border-pink-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              客服
             </Link>
           </div>
         </div>
