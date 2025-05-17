@@ -1,8 +1,38 @@
 
 
+'use client'
+
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+
+interface Product {
+  id: number
+  name: string
+  description: string
+  mainImageUrl: string
+  createdAt: string
+}
 
 function Home() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchProducts = async () => {
+    setLoading(true)
+    try {
+      const res = await axios.get('/api/proxy/addProduct')
+      setProducts(res.data)
+    } catch {
+      console.error('获取商品列表失败')
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
   return (
     <>
     <div className='min-w-[740px]'>
@@ -25,7 +55,7 @@ function Home() {
                 <ul className='flex justify-end flex-grow m-7'>
                     <li className='m-3'>
                       <Link href="/home" className="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1 hover:fill-pink-500" viewBox="0 0 20 20" fill="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1 fill-pink-500" viewBox="0 0 20 20" fill="currentColor">
                           <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                         </svg>
                       </Link>
@@ -44,6 +74,9 @@ function Home() {
                         </svg>
                       </Link>
                     </li>
+                    <li className='m-3'>
+                    <Link href="/addProduct" className="flex items-center ">add</Link>
+                      </li>
                 </ul>
             </nav>
         </div>
@@ -66,6 +99,28 @@ function Home() {
             </div>
             <div>
                 接下来的内容
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8">
+                {loading ? (
+                  <div className="col-span-full flex justify-center">
+                    <div className="loading loading-spinner loading-lg"></div>
+                  </div>
+                ) : (
+                  products.map(product => (
+                    <div key={product.id} className="card bg-base-100 shadow-xl">
+                      <figure>
+                        <img src={product.mainImageUrl} alt={product.name} className="h-48 w-full object-cover" />
+                      </figure>
+                      <div className="card-body">
+                        <h2 className="card-title">{product.name}</h2>
+                        <p>{product.description}</p>
+                        <div className="card-actions justify-end">
+                          <button className="btn btn-primary">购买</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
             </div>
         </div>
     </div>

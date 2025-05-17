@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "./entities/User";
 import { UserTableCreation } from "./entities/UserTableCreation";
+import { ProductTableCreation } from "./entities/ProductTableCreation";
 
 export const AppDataSource = new DataSource({
     type: "mysql",
@@ -10,9 +11,9 @@ export const AppDataSource = new DataSource({
     username: "root",
     password: "root",
     database: "nextjs",
-    synchronize: false,
+    synchronize: false ,
     logging: false,
-    entities: [User,UserTableCreation],
+    entities: [ProductTableCreation,User,UserTableCreation,],
     migrations: [],
     subscribers: [],
 });
