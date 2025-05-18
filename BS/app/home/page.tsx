@@ -5,6 +5,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { Outlet } from 'react-router-dom'
 
 interface Product {
   id: number
@@ -100,6 +101,7 @@ function Home() {
             <div>
                 接下来的内容
             </div>
+          
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8">
                 {loading ? (
                   <div className="col-span-full flex justify-center">

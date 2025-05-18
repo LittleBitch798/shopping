@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { BrowserRouter as Router } from 'react-router-dom'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,7 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN" data-theme="light"> 
-      <body className="bg-white">{children}</body>
+      <body className="bg-white">
+          {children}
+      </body>
     </html>
   )
 }
