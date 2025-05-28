@@ -24,23 +24,22 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     try {
-        const productData = await request.json();
-       
+        const { name, description, mainImageUrl, price } = await request.json();
+        
         if (!AppDataSource.isInitialized) {
             await AppDataSource.initialize();
         }
+        
         const productRepository = AppDataSource.getRepository(ProductTableCreation);
+        const product = productRepository.create({
+            name,
+            description,
+            mainImageUrl,
+            price: Number(price) || 0 // 确保price有值
+        });
         
-        const product = new ProductTableCreation();
-        product.name = productData.name;
-        product.description = productData.description;
-        product.mainImageUrl = productData.mainImageUrl;
-        
-        // 添加错误日志输出
-        console.log('Creating user:', product);
         await productRepository.save(product);
-        
-        return NextResponse.json({ message: '用户创建成功', product });
+        return NextResponse.json(product);
     } catch (error) {
         // 添加详细错误日志
         console.error('创建用户失败:', error);

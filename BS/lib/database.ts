@@ -11,8 +11,8 @@ export const AppDataSource = new DataSource({
     username: "root",
     password: "root",
     database: "nextjs",
-    synchronize: false ,
-    logging: false,
+    synchronize: false ,//同步数据库结构
+    logging: false ,
     entities: [ProductTableCreation,User,UserTableCreation,],
     migrations: [],
     subscribers: [],

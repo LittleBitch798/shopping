@@ -8,6 +8,7 @@ interface Product {
   name: string
   description: string
   mainImageUrl: string
+  price: number
   createdAt: string
 }
 
@@ -17,7 +18,8 @@ export default function AddProductPage() {
   const [form, setForm] = useState({ 
     name: '', 
     description: '', 
-    mainImageUrl: '' 
+    mainImageUrl: '',
+    price: 0
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -46,8 +48,11 @@ export default function AddProductPage() {
     setError('')
     
     try {
-      await axios.post('/api/proxy/addProduct', form)
-      setForm({ name: '', description: '', mainImageUrl: '' })
+      await axios.post('/api/proxy/addProduct', {
+        ...form,
+        price: form.price || 0 // 确保price有值
+      })
+      setForm({ name: '', description: '', mainImageUrl: '', price: 0 })
       setSuccess(true)
       fetchProducts()
     } catch {
@@ -97,6 +102,19 @@ export default function AddProductPage() {
                 value={form.mainImageUrl}
                 onChange={handleChange}
                 required
+              />
+            </div>
+            <div className="form-control w-full">
+              <input
+                name="price"
+                type="number"
+                placeholder="价格"
+                className="w-full bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-primary px-0 py-1 h-12"
+                value={form.price}
+                onChange={handleChange}
+                required
+                min="0"
+                step="0.01"
               />
             </div>
             <button type="submit" className="btn btn-primary w-full bg-pink-100 text-gray-500">添加商品</button>
