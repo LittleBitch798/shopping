@@ -9,6 +9,7 @@ interface Product {
   name: string
   description: string
   mainImageUrl: string
+  price: number
   createdAt: string
   price: string
 }

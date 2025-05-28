@@ -14,6 +14,9 @@ export class ProductTableCreation {
     @Column({ type: "varchar" })
     mainImageUrl!: string;
 
+    @Column({ type: "decimal", precision: 10, scale: 2 })
+    price!: number;
+
     @Column({ 
         type: "timestamp", 
         default: () => "CURRENT_TIMESTAMP" 
