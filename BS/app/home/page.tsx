@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Outlet } from 'react-router-dom'
-
+// import ImageCarousel from '../Dashboard/components/imageCarousel'
 interface Product {
   id: number
   name: string
@@ -124,6 +124,14 @@ function Home() {
                   ))
                 )}
             </div>
+
+
+            {/*需要做数据修改*/}
+                  {/* <ImageCarousel
+                    images={form.imageUrls.filter(url => url) as never[]}
+                    autoplay={true}
+                    interval={4000}
+                  /> */}    
         </div>
     </div>
     </>

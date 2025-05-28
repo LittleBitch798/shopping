@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         product.name = productData.name;
         product.description = productData.description;
         product.mainImageUrl = productData.mainImageUrl;
-        
+        product.price = productData.price
         // 添加错误日志输出
         console.log('Creating user:', product);
         await productRepository.save(product);
