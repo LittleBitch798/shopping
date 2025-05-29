@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+// import ImageCarousel from '../Dashboard/components/imageCarousel'
 
 interface Product {
-  id: number
+  id: string
   name: string
   description: string
   mainImageUrl: string
-  price: number
+  price: string  // 统一使用 string 类型，与表单中的 price 类型一致
   createdAt: string
 }
 
@@ -16,10 +17,12 @@ export default function AddProductPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({ 
+    id: '',
     name: '', 
-    description: '', 
-    mainImageUrl: '',
-    price: 0
+    description: '',
+    createdAt: '', 
+    price: '',
+    imageUrls: [''] 
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -29,8 +32,9 @@ export default function AddProductPage() {
     try {
       const res = await axios.get('/api/proxy/addProduct')
       setProducts(res.data)
-    } catch {
+    } catch (err) {
       setError('获取商品列表失败')
+      console.error(err)
     }
     setLoading(false)
   }
@@ -39,105 +43,315 @@ export default function AddProductPage() {
     fetchProducts()
   }, [])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+  // 处理表单输入变化
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setForm(prev => ({ ...prev, [name]: value }))
+    setError('')
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // 处理图片URL输入变化
+  const handleImageUrlChange = (index: number, value: string) => {
+    setForm(prev => {
+      const newImageUrls = [...prev.imageUrls]
+      newImageUrls[index] = value
+      return { ...prev, imageUrls: newImageUrls }
+    })
     setError('')
-    
-    try {
-      await axios.post('/api/proxy/addProduct', {
-        ...form,
-        price: form.price || 0 // 确保price有值
+  }
+
+  // 添加新的图片URL输入框
+  const addImageUrlField = () => {
+    setForm(prev => ({ ...prev, imageUrls: [...prev.imageUrls, ''] }))
+  }
+
+  // 移除图片URL输入框
+  const removeImageUrlField = (index: number) => {
+    setForm(prev => {
+      const newImageUrls = [...prev.imageUrls]
+      newImageUrls.splice(index, 1)
+      return { ...prev, imageUrls: newImageUrls }
+    })
+  }
+
+  // 提交表单
+  // 修改handleSubmit中的URL处理逻辑
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  
+  const validImageUrls = form.imageUrls.filter(url => url.trim() !== '')
+  // 修改为直接拼接URL，不再使用JSON.stringify
+  const urlsString = validImageUrls.join(',')
+  
+  if (!form.name || !form.description || !form.price || validImageUrls.length === 0) {
+    setError('请填写所有必填字段并至少提供一个有效的图片URL')
+    return
+  }
+
+  try {
+    await axios.post('/api/proxy/addProduct', {
+        id:'',
+        name: form.name,
+        description: form.description,
+        price: form.price,
+        createdAt: '',
+        mainImageUrl: urlsString  // 直接使用拼接后的字符串
+    })
+      
+      // 重置表单
+      setForm({ 
+        id: '', 
+        name: '', 
+        description: '', 
+        price: '',
+        createdAt: '', 
+        imageUrls: [''] 
       })
-      setForm({ name: '', description: '', mainImageUrl: '', price: 0 })
       setSuccess(true)
       fetchProducts()
-    } catch {
+      
+      // 3秒后隐藏成功消息
+      setTimeout(() => setSuccess(false), 3000)
+    } catch (err) {
       setError('创建商品失败！')
+      console.error(err)
     }
   }
 
   return (
-    <div className='w-screen min-h-screen flex flex-col'>
-      <div className='flex justify-center mt-16'>
-        <h1 className='text-5xl font-bold italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600'>
-          BS Store
-        </h1>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto py-4 px-4 h-full mt-20">
-        <div className='flex flex-col h-full'>
-          <form onSubmit={handleSubmit} className="flex flex-col justify-center items-center card shadow-xl p-4 space-y-4 h-full w-full">
-            <div className="text-2xl mb-2 w-full text-left">添加新商品</div>
-            <div className="form-control w-full">
-              <input
-                name="name"
-                type="text"
-                placeholder="商品名称"
-                className="w-full bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-primary px-0 py-1 h-12"
-                value={form.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-control w-full">
-              <input
-                name="description"
-                type="text"
-                placeholder="商品描述"
-                className="w-full bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-primary px-0 py-1 h-12"
-                value={form.description}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-control w-full">
-              <input
-                name="mainImageUrl"
-                type="text"
-                placeholder="商品图片URL"
-                className="w-full bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-primary px-0 py-1 h-12"
-                value={form.mainImageUrl}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-control w-full">
-              <input
-                name="price"
-                type="number"
-                placeholder="价格"
-                className="w-full bg-transparent border-0 border-b-2 border-gray-300 focus:outline-none focus:border-primary px-0 py-1 h-12"
-                value={form.price}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-              />
-            </div>
-            <button type="submit" className="btn btn-primary w-full bg-pink-100 text-gray-500">添加商品</button>
-            {error && <div className="text-error">{error}</div>}
+    <div className="w-screen min-h-screen flex flex-col bg-gradient-to-br from-neutral-100 to-neutral-200">
+      
+      {/* 内容区 */}
+      <div className="pt-24 pb-16 px-4 flex-grow">
+        <div className="max-w-6xl mx-auto">
+          {/* 标题区域 */}
+          <div className="text-center mb-12">
+            <h1 className="text-[clamp(2.5rem,5vw,4rem)] font-bold italic tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-600 text-shadow">
+              BS Store
+            </h1>
+            <p className="text-neutral-700 mt-4 text-lg max-w-2xl mx-auto">管理您的商品信息，添加新商品或更新现有商品</p>
+          </div>
 
-            {success && (
-              <div className="alert alert-success shadow-lg bg-purple-200">
-                <div>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>商品添加成功！</span>
+          {/* 表单和图片区域 */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* 表单卡片 */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-2xl shadow-xl p-6 transition-all duration-300 hover:shadow-2xl">
+                <h2 className="text-2xl font-bold mb-6 text-neutral-800">添加新商品</h2>
+                
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* 基本信息 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label htmlFor="name" className="block text-sm font-medium text-neutral-700">商品名称</label>
+                      <input
+                        name="name"
+                        type="text"
+                        placeholder="请输入商品名称"
+                        className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-300 text-neutral-800"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label htmlFor="price" className="block text-sm font-medium text-neutral-700">商品价格</label>
+                      <input
+                        name="price"
+                        type="number"
+                        placeholder="请输入商品价格"
+                        className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-300 text-neutral-800"
+                        value={form.price}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* 商品描述 */}
+                  <div className="space-y-2">
+                    <label htmlFor="description" className="block text-sm font-medium text-neutral-700">商品描述</label>
+                    <textarea
+                      name="description"
+                      rows={3}
+                      placeholder="请输入商品描述"
+                      className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-300 text-neutral-800 resize-none"
+                      value={form.description}
+                      onChange={handleChange}
+                      required
+                    ></textarea>
+                  </div>
+                  
+                  {/* 图片URL区域 */}
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium text-neutral-700">商品图片URL</label>
+                    
+                    {form.imageUrls.map((url, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <input
+                          type="text"
+                          placeholder="输入图片URL"
+                          value={url}
+                          onChange={(e) => handleImageUrlChange(index, e.target.value)}
+                          className="flex-grow px-4 py-3 rounded-lg border border-neutral-300 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all duration-300 text-neutral-800"
+                        />
+                        {index > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => removeImageUrlField(index)}
+                            className="p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors duration-300"
+                          >
+                            <i className="fa fa-minus"></i>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    
+                    <button
+                      type="button"
+                      onClick={addImageUrlField}
+                      className="w-full py-3 px-6 bg-pink-100 text-pink-600 rounded-lg font-medium hover:bg-pink-200 transition-all duration-300 flex items-center justify-center"
+                    >
+                      <i className="fa fa-plus-circle mr-2"></i>
+                      添加图片URL
+                    </button>
+                    
+                    {/* 图片预览 */}
+                    {form.imageUrls.some(url => url.trim() !== '') && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {form.imageUrls
+                          .filter(url => url.trim() !== '')
+                          .map((url, index) => (
+                            <div key={index} className="relative group">
+                              <div className="aspect-square rounded-lg overflow-hidden bg-neutral-100">
+                                <img 
+                                  src={url} 
+                                  alt={`预览图 ${index + 1}`} 
+                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                  
+                                />
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* 提交按钮 */}
+                  <div>
+                    <button
+                      type="submit"
+                      className="w-full py-3 px-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-pink-500/20 active:scale-95 transition-all duration-300 flex items-center justify-center"
+                    >
+                      <i className="fa fa-plus-circle mr-2"></i>
+                      添加商品
+                    </button>
+                    
+                    {/* 错误消息 */}
+                    {error && (
+                      <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center">
+                        <i className="fa fa-exclamation-circle mr-2"></i>
+                        {error}
+                      </div>
+                    )}
+                    
+                    {/* 成功消息 */}
+                    {success && (
+                      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm flex items-center">
+                        <i className="fa fa-check-circle mr-2"></i>
+                        商品添加成功！
+                      </div>
+                    )}
+                  </div>
+                </form>
+              </div>
+            </div>
+            
+            {/* 图片展示区域 */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden h-full flex flex-col">
+                <div className="p-6 border-b border-neutral-200">
+                  <h2 className="text-xl font-bold text-neutral-800">商品预览</h2>
+                </div>
+                <div className="flex-grow flex flex-col items-center justify-center p-6">
+                  {form.imageUrls[0] ? (
+                    <div className="w-full aspect-square rounded-xl overflow-hidden shadow-lg mb-4">
+                      <img 
+                        //Url图轮播
+                        src={form.imageUrls[0]} 
+                        alt="商品预览" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-square rounded-xl overflow-hidden bg-neutral-100 flex items-center justify-center mb-4">
+                      <i className="fa fa-camera text-5xl text-neutral-300"></i>
+                    </div>
+                  )}
+                  {/*需要做数据修改*/}
+                  {/* <ImageCarousel
+                    images={form.imageUrls.filter(url => url) as never[]}
+                    autoplay={true}
+                    interval={4000}
+                  /> */}
+                  <div className="w-full">
+                    <h3 className="text-lg font-semibold text-neutral-800 mb-2 truncate">
+                      {form.name || '商品名称'}
+                    </h3>
+                    <p className="text-neutral-600 mb-4 line-clamp-3">
+                      {form.description || '请输入商品描述...'}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-pink-500 font-bold text-xl">
+                        {form.price ? `¥${form.price}` : '¥0.00'}
+                      </span>
+                      <span className="text-sm text-neutral-500">
+                        {form.imageUrls.filter(url => url.trim() !== '').length} 张图片
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
-          </form>
-        </div>
-        <div className='hidden md:block h-full'>
-          <img 
-            src="img/门店.jpg" 
-            alt=""
-            className="w-full h-full object-cover rounded-lg shadow-lg"
-          />
+            </div>
+          </div>
+          
+          {/* 商品列表 */}
+          {products.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-2xl font-bold mb-6 text-neutral-800">最近添加的商品</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.slice(0, 3).map(product => (
+                  <div key={product.id} className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+                    <div className="aspect-square">
+                      <img 
+                      
+                        src={product.mainImageUrl.replace(/"/g, '') || '/placeholder.jpg'} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover"
+                      />
+                      {/* <ImageCarousel
+                        //Url图轮播
+                        images={form.imageUrls.filter(url => url) as never[]}
+                        autoplay={true}
+                        interval={4000}
+                      /> */}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-neutral-800 mb-1 truncate">{product.name}</h3>
+                      <p className="text-sm text-neutral-600 mb-3 line-clamp-2">{product.description}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-pink-500 font-medium">¥{product.price}</span>
+                        <span className="text-xs text-neutral-500">
+                          {new Date(product.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
