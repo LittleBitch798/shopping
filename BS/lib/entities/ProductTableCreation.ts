@@ -23,8 +23,6 @@ export class ProductTableCreation {
     })
     createdAt!: Date;
 
-    @Column({ type: "varchar", length:100})
-    price!: string;
 }
 
 //建表指令 URL长度需要注意

@@ -3,22 +3,25 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { Outlet } from 'react-router-dom'
-// import ImageCarousel from '../Dashboard/components/imageCarousel'
+import ImageCarousel from '../Dashboard/components/imageCarousel'
+
 interface Product {
   id: number
   name: string
   description: string
   mainImageUrl: string
   createdAt: string
+  price: number
 }
 
 function Home() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-
+  const imagesRef = useRef(null)
+  
   const fetchProducts = async () => {
     setLoading(true)
     try {
@@ -144,11 +147,24 @@ const handleBuyNow = async (productId: number) => {
                   products.map(product => (
                     <div key={product.id} className="card bg-base-100 shadow-xl">
                       <figure>
-                        <img src={product.mainImageUrl} alt={product.name} className="h-48 w-full object-cover" />
+                        {/* <img src={product.mainImageUrl} alt={product.name} className="h-48 w-full object-cover" /> */}
+                        {product.mainImageUrl.length > 0 ? (
+                        <ImageCarousel
+                            images={product.mainImageUrl.slice(1,-1).split(',').filter(url => url.trim() !== '')}
+                            ref={imagesRef}
+                            autoplay={false} //修改图片是否轮播
+                            interval={4000}
+                        /> 
+                      ) : (
+                        <div className="w-full aspect-square rounded-xl overflow-hidden bg-neutral-100 flex items-center justify-center mb-4">
+                          <i className="fa fa-camera text-5xl text-neutral-300"></i>
+                        </div>
+                      )}
                       </figure>
                       <div className="card-body">
                         <h2 className="card-title">{product.name}</h2>
                         <p>{product.description}</p>
+                        <p>¥{product.price}</p>
                         <div className="card-actions justify-end">
                         
                           <button 
@@ -171,12 +187,7 @@ const handleBuyNow = async (productId: number) => {
             </div>
 
 
-            {/*需要做数据修改*/}
-                  {/* <ImageCarousel
-                    images={form.imageUrls.filter(url => url) as never[]}
-                    autoplay={true}
-                    interval={4000}
-                  /> */}    
+              
         </div>
     </div>
     </>
