@@ -6,10 +6,11 @@ import ImageCarousel from '../Dashboard/components/imageCarousel'
 
 interface Product {
   id: string
+  id: string
   name: string
   description: string
   mainImageUrl: string
-  price: number
+  price: string  // 统一使用 string 类型，与表单中的 price 类型一致
   createdAt: string
 
 }
@@ -19,7 +20,12 @@ export default function AddProductPage() {
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({ 
     id: '',
+    id: '',
     name: '', 
+    description: '',
+    createdAt: '', 
+    price: '',
+    imageUrls: [''] 
     description: '',
     createdAt: '', 
     price: '',
@@ -41,7 +47,9 @@ export default function AddProductPage() {
       const res = await axios.get('/api/proxy/addProduct')
       setProducts(res.data)
     } catch (err) {
+    } catch (err) {
       setError('获取商品列表失败')
+      console.error(err)
       console.error(err)
     }
     setLoading(false)
@@ -123,7 +131,12 @@ export default function AddProductPage() {
       // 3秒后隐藏成功消息
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
+      
+      // 3秒后隐藏成功消息
+      setTimeout(() => setSuccess(false), 3000)
+    } catch (err) {
       setError('创建商品失败！')
+      console.error(err)
       console.error(err)
     }
   }
