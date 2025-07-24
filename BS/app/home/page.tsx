@@ -16,48 +16,87 @@ interface Product {
 }
 
 function Home() {
-  const [products, setProducts] = useState<Product[]>([])
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchKeyword, setSearchKeyword] = useState('') 
+  const [showForm, setShowForm] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   const fetchProducts = async () => {
     setLoading(true)
     try {
-      const res = await axios.get('/api/proxy/addProduct')
-      setProducts(res.data)
+      const res = await axios.get('/api/proxy/addProduct');
+      setAllProducts(res.data);
+      setFilteredProducts(res.data);
     } catch {
-      console.error('获取商品列表失败')
+      console.error('获取商品列表失败');
     }
-    setLoading(false)
+    setLoading(false);
   }
 
   useEffect(() => {
-    fetchProducts()
-  }, [])
-  
+    fetchProducts();
+  }, []);
+
+  const handleSearch = () => {
+    if (searchKeyword.length < 2) {
+      alert('请输入您需要搜索的商品');
+      return;
+    }
+    const matchedProducts = allProducts.filter(product => {
+      for (let i = 0; i <= product.name.length - 2; i++) {
+        const twoChars = product.name.slice(i, i + 2);
+        if (searchKeyword.includes(twoChars)) {
+          return true;
+        }
+      }
+      return false;
+    });
+
+    if (matchedProducts.length > 0) {
+      setFilteredProducts(matchedProducts);
+      setSelectedProduct(matchedProducts[0]);
+      setShowForm(true);
+    } else {
+      alert('未找到匹配的商品，请尝试其他关键字');
+      setFilteredProducts(allProducts);
+      setShowForm(false);
+      setSelectedProduct(null);
+    }
+  };
+
   const handleAddToCart = async (productId: number) => {
     try {
-        await axios.post('/api/proxy/updateCart', { productId });
-        alert('商品已添加到购物车');
+      await axios.post('/api/proxy/updateCart', { productId });
+      alert('商品已添加到购物车');
     } catch (error) {
-        console.error('添加购物车失败:', error);
+      console.error('添加购物车失败:', error);
     }
-};
+  };
 
-const handleBuyNow = async (productId: number) => {
-  try {
-    const address = prompt('请输入收货地址');
-    if (address) {
-      await axios.post('/api/proxy/buyNow', { 
-        productId,
-        address 
-      });
-      window.location.href = '/shipping';
+  const handleBuyNow = async (productId: number) => {
+    try {
+      const address = prompt('请输入收货地址');
+      if (address) {
+        await axios.post('/api/proxy/buyNow', { 
+          productId,
+          address 
+        });
+        window.location.href = '/shipping';
+      }
+    } catch (error) {
+      console.error('购买失败:', error);
+      alert('购买失败，请重试');
     }
-  } catch (error) {
-    console.error('购买失败:', error);
-    alert('购买失败，请重试');
-  }
-};
+  };
+
+  // 处理键盘按下事件
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <>
@@ -66,12 +105,25 @@ const handleBuyNow = async (productId: number) => {
             <div className='flex-1 flex justify-start items-center ml-7 hover:text-pink-500 hover:fill-pink-500'>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5  cursor-pointer" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-              
               </svg>
-              <p className='m-3 '>搜索</p>
+              <input
+                type="text"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+// {/* 添加键盘按下事件处理 */}
+                onKeyDown={handleKeyDown} 
+                placeholder="搜索商品"
+                className="ml-2 p-1 border border-gray-300 rounded"
+              />
+              <button
+                onClick={handleSearch}
+                className="ml-2 p-1 bg-pink-500 text-white rounded hover:bg-pink-600"
+              >
+                搜索
+              </button>
             </div>
             <div className='flex-1'>
-            <div className='flex justify-center items-center mt-7'>  {/* 减少顶部间距 */}
+            <div className='flex justify-center items-center mt-7'> 
                 <h1 className='text-5xl font-thin italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600 uppercase'>
                     BS STORE
                 </h1>
@@ -109,8 +161,8 @@ const handleBuyNow = async (productId: number) => {
                       </Link>
                     </li>
                     <li className='m-3'>
-                    <Link href="/addProduct" className="flex items-center ">add</Link>
-                      </li>
+                      <Link href="/addProduct" className="flex items-center ">add</Link>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -121,7 +173,7 @@ const handleBuyNow = async (productId: number) => {
                     loop 
                     muted 
                     className="absolute inset-0 w-full h-3/4 object-cover"
-                    style={{ marginTop: '4rem' }} // 预留顶部导航栏位置
+                    style={{ marginTop: '4rem' }} 
                 >
                     <source src="/mp4/eyes.mp4" type="video/mp4" />
                 </video>
@@ -141,7 +193,7 @@ const handleBuyNow = async (productId: number) => {
                     <div className="loading loading-spinner loading-lg"></div>
                   </div>
                 ) : (
-                  products.map(product => (
+                  filteredProducts.map(product => (
                     <div key={product.id} className="card bg-base-100 shadow-xl">
                       <figure>
                         <img src={product.mainImageUrl} alt={product.name} className="h-48 w-full object-cover" />
@@ -150,7 +202,6 @@ const handleBuyNow = async (productId: number) => {
                         <h2 className="card-title">{product.name}</h2>
                         <p>{product.description}</p>
                         <div className="card-actions justify-end">
-                        
                           <button 
                             onClick={() => handleBuyNow(product.id)}
                             className="btn btn-primary"
@@ -171,6 +222,43 @@ const handleBuyNow = async (productId: number) => {
             </div>
         </div>
     </div>
+    {showForm && selectedProduct && (
+      <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+        <div className="bg-white p-8 rounded shadow-lg max-h-[90vh] max-w-[90vw] overflow-y-auto">
+          <div className="flex justify-end mb-4">
+            <button 
+              onClick={() => setShowForm(false)}
+              className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+            >
+              ×
+            </button>
+          </div>
+          <h2 className="text-xl font-bold mb-4">商品信息</h2>
+          <img 
+            src={selectedProduct.mainImageUrl} 
+            alt={selectedProduct.name} 
+            className="w-full object-cover mb-4"
+          />
+          <p><strong>名称:</strong> {selectedProduct.name}</p>
+          <p><strong>描述:</strong> {selectedProduct.description}</p>
+          <p><strong>创建时间:</strong> {selectedProduct.createdAt}</p>
+          <div className="mt-4 flex space-x-4">
+            <button 
+              onClick={() => handleAddToCart(selectedProduct.id)}
+              className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
+            >
+              添加购物车
+            </button>
+            <button 
+              onClick={() => handleBuyNow(selectedProduct.id)}
+              className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
+            >
+              立即购买
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   )
 }
