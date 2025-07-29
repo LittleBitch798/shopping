@@ -12,21 +12,7 @@ export class UserTableCreation {
     password!: string;//密码
 
     @Column({ type: "varchar", length: 11, unique: true })
-    phone!: string;//手机号
-
-    @Column({ 
-        type: "varchar", 
-        length: 255,  // 增加长度以容纳多个商品ID
-        default: "[]" // 默认值为空数组的JSON字符串
-    })
-    shopCar!: string;//购物车商品ID列表，存储为JSON字符串
-
-    @Column({
-        type: "varchar", // varchar
-        length: 255,
-        default: '[]' // 默认空数组
-    })
-    shippingInfo!: string; // 物流信息，存储为JSON数组
+    phone!: string; // 唯一手机号（UNIQUE约束）
     
     @Column({ 
         type: "timestamp", 
@@ -34,3 +20,14 @@ export class UserTableCreation {
     })
     createdAt!: Date;
 }
+
+
+    /* MySQL建表命令：
+    CREATE TABLE UserTable (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(10),
+        password VARCHAR(16),
+        phone VARCHAR(11) UNIQUE,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    */

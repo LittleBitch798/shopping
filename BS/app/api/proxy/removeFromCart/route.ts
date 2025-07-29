@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AppDataSource } from '@/lib/database';
-import { UserTableCreation } from '@/lib/entities/UserTableCreation';
+import { CartTable } from '@/lib/entities/CartTable';
 
 export async function POST(request: NextRequest) {
     try {
@@ -10,31 +10,14 @@ export async function POST(request: NextRequest) {
             await AppDataSource.initialize();
         }
         
-        const userRepository = AppDataSource.getRepository(UserTableCreation);
-        // 简化处理，使用第一个用户
-        const user = await userRepository.findOne({ where: { id: 1 } });
+        const cartRepository = AppDataSource.getRepository(CartTable);
+        await cartRepository.delete(productId);
         
-        if (!user) {
-            return NextResponse.json(
-                { error: '用户不存在' },
-                { status: 404 }
-            );
-        }
-        
-        // 解析现有购物车
-        const cart = JSON.parse(user.shopCar || '[]');
-        // 过滤掉要移除的商品ID
-        const updatedCart = cart.filter((id: number) => id !== productId);
-        // 更新购物车
-        user.shopCar = JSON.stringify(updatedCart);
-        
-        await userRepository.save(user);
-        
-        return NextResponse.json({ message: '商品已移除' });
+        return NextResponse.json({ message: '商品已从购物车删除' });
     } catch (error) {
-        console.error('移除商品失败:', error);
+        console.error('删除购物车商品失败:', error);
         return NextResponse.json(
-            { error: '移除商品失败', details: (error as Error).message },
+            { error: '删除购物车商品失败', details: (error as Error).message },
             { status: 500 }
         );
     }

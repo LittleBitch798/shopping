@@ -1,8 +1,10 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { User } from "./entities/User";
+import { CartTable } from "./entities/CartTable";
+import { ProductTable } from "./entities/ProductTable";
+import { ShippingTable } from "./entities/ShippingTable";
+import { UserInfoTable } from "./entities/UserInfoTable";
 import { UserTableCreation } from "./entities/UserTableCreation";
-import { ProductTableCreation } from "./entities/ProductTableCreation";
 
 export const AppDataSource = new DataSource({
     type: "mysql",
@@ -11,9 +13,15 @@ export const AppDataSource = new DataSource({
     username: "root",
     password: "123456",
     database: "nextjs",
-    synchronize: false ,//同步数据库结构
-    logging: false ,
-    entities: [ProductTableCreation,User,UserTableCreation,],
+    synchronize: false,
+    logging: false,
+    entities: [
+        CartTable,
+        ProductTable,
+        ShippingTable,
+        UserInfoTable,
+        UserTableCreation
+    ],
     migrations: [],
     subscribers: [],
 });

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AppDataSource } from '@/lib/database';
 import { UserTableCreation } from '@/lib/entities/UserTableCreation';
-import { ProductTableCreation } from '@/lib/entities/ProductTableCreation';
+import { ProductTable } from '@/lib/entities/ProductTable';
 
 export async function POST(request: NextRequest) {
     try {
@@ -11,21 +11,17 @@ export async function POST(request: NextRequest) {
         }
         
         const userRepository = AppDataSource.getRepository(UserTableCreation);
-        const productRepository = AppDataSource.getRepository(ProductTableCreation);
-
+        // 移除ProductTable相关引用
         const user = await userRepository.findOne({
             where: { phone, password }
         });
 
         if (user) {
-            // 获取购物车商品详情
-            const cartItems = JSON.parse(user.shopCar || '[]');
-            const products = await productRepository.findByIds(cartItems);
-            
+            // 删除购物车相关逻辑
             return NextResponse.json({ 
                 message: '登录成功', 
-                user,
-                cart: products // 返回购物车商品详情
+                user
+                // 移除cart字段
             });
         } else {
             return NextResponse.json(

@@ -1,17 +1,16 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
-import ImageCarousel from '../Dashboard/components/imageCarousel'
+// import ImageCarousel from '../Dashboard/components/imageCarousel'
 
 interface Product {
   id: string
   name: string
   description: string
-  mainImageUrl: string
+  imageUrl: string
   price: string  // 统一使用 string 类型，与表单中的 price 类型一致
   createdAt: string
-
 }
 
 export default function AddProductPage() {
@@ -24,18 +23,9 @@ export default function AddProductPage() {
     createdAt: '', 
     price: '',
     imageUrls: [''] 
-
-
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const imagesRef = useRef(null)
-  const [imagesUrlState,setImagesUrlState] = useState<string[]>([])
-
-  useEffect(() => {
-    const validUrls = form.imageUrls.filter(url => url.trim() !== '');
-    setImagesUrlState(validUrls);
-  }, [form.imageUrls]);
 
   const fetchProducts = async () => {
     setLoading(true)
@@ -44,7 +34,6 @@ export default function AddProductPage() {
       setProducts(res.data)
     } catch (err) {
       setError('获取商品列表失败')
-      console.error(err)
       console.error(err)
     }
     setLoading(false)
@@ -86,30 +75,26 @@ export default function AddProductPage() {
   }
 
   // 提交表单
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // 表单验证
-    const validImageUrls = form.imageUrls.filter(url => url.trim() !== '')
-    //数据拆分转化成字符串用,间隔
-    const urlsString = JSON.stringify(validImageUrls.join(','))
-    console.log("测试",urlsString)
-    
-    if (!form.name || !form.description || !form.price || validImageUrls.length === 0) {
-      setError('请填写所有必填字段并至少提供一个有效的图片URL')
-      return
-    }
+  // 修改handleSubmit中的URL处理逻辑
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  
+  const validImageUrls = form.imageUrls.filter(url => url.trim() !== '')
+  // 修改为直接拼接URL，不再使用JSON.stringify
+  const urlsString = validImageUrls.join(',')
+  
+  if (!form.name || !form.description || !form.price || validImageUrls.length === 0) {
+    setError('请填写所有必填字段并至少提供一个有效的图片URL')
+    return
+  }
 
-    try {
-      // 发送请求
-      await axios.post('/api/proxy/addProduct', {
-          id:'',
-          name: form.name,
-          description: form.description,
-          price: form.price,
-          createdAt: '',
-          mainImageUrl: urlsString
-      })
+  try {
+    await axios.post('/api/proxy/addProduct', {
+        productName: form.name, // 将name字段改为productName，以匹配API期望的字段名
+        description: form.description,
+        price: form.price,
+        imageUrl: urlsString  // 直接使用拼接后的字符串
+    })
       
       // 重置表单
       setForm({ 
@@ -126,7 +111,7 @@ export default function AddProductPage() {
       // 3秒后隐藏成功消息
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
-      
+      setError('创建商品失败！')
       console.error(err)
     }
   }
@@ -288,19 +273,26 @@ export default function AddProductPage() {
                   <h2 className="text-xl font-bold text-neutral-800">商品预览</h2>
                 </div>
                 <div className="flex-grow flex flex-col items-center justify-center p-6">
-  
-                  {imagesUrlState.length > 0 ? (
-                        <ImageCarousel
-                            images={imagesUrlState}
-                            ref={imagesRef}
-                            autoplay={false}
-                            interval={4000}
-                        /> 
+                  {form.imageUrls[0] ? (
+                    <div className="w-full aspect-square rounded-xl overflow-hidden shadow-lg mb-4">
+                      <img 
+                        //Url图轮播
+                        src={form.imageUrls[0]} 
+                        alt="商品预览" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   ) : (
                     <div className="w-full aspect-square rounded-xl overflow-hidden bg-neutral-100 flex items-center justify-center mb-4">
                       <i className="fa fa-camera text-5xl text-neutral-300"></i>
                     </div>
-                  )}                 
+                  )}
+                  {/*需要做数据修改*/}
+                  {/* <ImageCarousel
+                    images={form.imageUrls.filter(url => url) as never[]}
+                    autoplay={true}
+                    interval={4000}
+                  /> */}
                   <div className="w-full">
                     <h3 className="text-lg font-semibold text-neutral-800 mb-2 truncate">
                       {form.name || '商品名称'}
@@ -330,20 +322,18 @@ export default function AddProductPage() {
                 {products.slice(0, 3).map(product => (
                   <div key={product.id} className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
                     <div className="aspect-square">
+                      <img 
                       
-                      {product.mainImageUrl.length > 0 ? (
-                        <ImageCarousel
-                            images={product.mainImageUrl.slice(1,-1).split(',').filter(url => url.trim() !== '')}
-                            ref={imagesRef}
-                            autoplay={false} //修改图片是否轮播
-                            interval={4000}
-                        /> 
-                      ) : (
-                        <div className="w-full aspect-square rounded-xl overflow-hidden bg-neutral-100 flex items-center justify-center mb-4">
-                          <i className="fa fa-camera text-5xl text-neutral-300"></i>
-                        </div>
-                      )}
-
+                        src={product.imageUrl?.replace(/"/g, '') || '/placeholder.jpg'}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* <ImageCarousel
+                        //Url图轮播
+                        images={form.imageUrls.filter(url => url) as never[]}
+                        autoplay={true}
+                        interval={4000}
+                      /> */}
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-neutral-800 mb-1 truncate">{product.name}</h3>
@@ -364,4 +354,4 @@ export default function AddProductPage() {
       </div>
     </div>
   )
-}    
+}

@@ -22,52 +22,58 @@ export default function ShippingPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchShippingInfo = async () => {
+  // 获取物流信息函数
+  const fetchShippingInfo = async () => {
       try {
-        const response = await axios.get('/api/proxy/getShippingInfo');
-        // 确保正确处理varchar格式的JSON字符串
-        const shippingData = response.data.shippingInfo 
-          ? JSON.parse(response.data.shippingInfo)
-          : [];
-        setShippingItems(shippingData);
-        
-        // 获取商品详情
-        const productIds = shippingData.map((item: ShippingItem) => item.productId);
-        if(productIds.length > 0) {
-          const productsResponse = await axios.post('/api/proxy/getProductsByIds', { ids: productIds });
-          setProducts(productsResponse.data);
-        }
+          setLoading(true);
+          const response = await axios.get('/api/proxy/addShipping');
+          const shippingData = response.data.shippingInfo || [];
+          console.log('获取到物流数据:', shippingData);
+          setShippingItems(shippingData);
+          
+          const productIds = shippingData.map((item: ShippingItem) => item.productId);
+          if(productIds.length > 0) {
+              console.log('获取产品详情，ID列表:', productIds);
+              const productsResponse = await axios.post('/api/proxy/getProductsByIds', { ids: productIds });
+              setProducts(productsResponse.data);
+          } else {
+              setProducts([]);
+          }
       } catch (error) {
-        console.error('获取物流信息失败:', error);
+          console.error('获取物流信息失败:', error);
       } finally {
-        setLoading(false);
+          setLoading(false);
       }
-    };
-    fetchShippingInfo();
-  }, []);
-
-  const handleDeleteOrder = async (orderId: number) => {
-    try {
-      await axios.post('/api/proxy/deleteOrder', { orderId });
-      setShippingItems(shippingItems.filter(item => item.id !== orderId));
-      // 同时更新关联的商品列表
-      const remainingProductIds = shippingItems
-        .filter(item => item.id !== orderId)
-        .map(item => item.productId);
-      if (remainingProductIds.length > 0) {
-        const productsResponse = await axios.post('/api/proxy/getProductsByIds', { 
-          ids: remainingProductIds 
-        });
-        setProducts(productsResponse.data);
-      } else {
-        setProducts([]);
-      }
-    } catch (error) {
-      console.error('删除订单失败:', error);
-      alert('删除订单失败，请重试');
-    }
   };
+  
+  // 初始化时获取物流信息
+  useEffect(() => {
+      fetchShippingInfo();
+  }, []);
+  
+  // 删除订单函数
+  const handleDeleteOrder = async (orderId: number) => {
+      if (!confirm('确定要删除此订单吗？')) {
+          return;
+      }
+      
+      try {
+          const response = await axios.post('/api/proxy/deleteShipping', {
+              orderId
+          });
+          console.log('删除订单响应:', response.data);
+          setShippingItems(shippingItems.filter(item => item.id !== orderId));
+          alert('订单删除成功');
+      } catch (error: any) {
+          console.error('删除订单失败:', error);
+          const errorMessage = error.response?.data?.details || error.message || '未知错误';
+          alert('删除订单失败: ' + errorMessage);
+      }
+  };
+  // 然后在useEffect和删除函数中调用
+  useEffect(() => {
+      fetchShippingInfo();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -88,6 +94,10 @@ export default function ShippingPage() {
         <div className="space-y-6 w-full"> {/* 修改为垂直排列 */}
           {shippingItems.map((item, index) => {
             const product = products.find(p => p.id === item.productId);
+            function handlePurchase(id: number): void {
+              throw new Error('Function not implemented.');
+            }
+
             return (
               <div key={index} className="card bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 w-full"> {/* 添加w-full */}
                 <div className="flex flex-col md:flex-row"> {/* 添加响应式flex布局 */}
@@ -105,7 +115,25 @@ export default function ShippingPage() {
                       <>
                         <h2 className="card-title text-lg font-semibold text-gray-800">{product.name}</h2>
                         <p className="text-gray-600 text-sm">{product.description}</p>
+                        <figure className="md:w-1/3 h-60 overflow-hidden rounded-t-lg md:rounded-l-lg md:rounded-tr-none">
+                          <img 
+                            src={product.mainImageUrl} 
+                            alt={product.name} 
+                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                        </figure>
                       </>
+                    )}
+                  
+                    {product && (
+                        <div className="mt-4 space-y-2">
+                            <button 
+                                onClick={() => handlePurchase(product.id)}
+                                className="btn btn-primary btn-sm"
+                            >
+                                购买
+                            </button>
+                        </div>
                     )}
                     <div className="mt-4 space-y-2">
                       <p className="text-gray-700">
@@ -118,7 +146,7 @@ export default function ShippingPage() {
                           {item.status === 'pending' ? '待发货' : item.status === 'shipped' ? '运输中' : '已送达'}
                         </span>
                       </p>
-                      // 在渲染部分添加了删除按钮
+                    
                       <button 
                         onClick={() => handleDeleteOrder(item.id)}
                         className="btn btn-error btn-sm mt-2"

@@ -2,8 +2,12 @@
 
 import { useState } from 'react'
 import axios from 'axios'
+import { useUserStore } from '../store/userStore';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const router = useRouter(); // 将useRouter移动到组件函数内部
+  const { setPhone,phone } = useUserStore();
   const [form, setForm] = useState({ phone: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,10 +25,16 @@ export default function LoginPage() {
       setLoading(false)
       return
     }
+    // 删除这行 ↓↓↓
+    // const router = useRouter();
+    
+    // 修改提交函数中的跳转方式
     try {
-      const res = await axios.post('/api/proxy/login', form)
-      setLoading(false)
-      window.location.href = '/home'
+      const res = await axios.post('/api/proxy/login', form);
+      setPhone(form.phone);
+      console.log('当前存储的手机号:', form.phone);
+      setLoading(false);
+      router.push('/home'); // 改用Next路由导航
     } catch (err: any) {
       setLoading(false)
       if (err.response && err.response.data && err.response.data.error) {
@@ -34,6 +44,7 @@ export default function LoginPage() {
       }
     }
   }
+
 
   return (
     <div className='w-screen min-h-screen flex flex-col'>
